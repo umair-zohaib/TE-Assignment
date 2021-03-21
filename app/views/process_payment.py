@@ -1,4 +1,4 @@
-from flask import request, Blueprint, jsonify
+from flask import request, Blueprint, jsonify, make_response
 import json
 
 from app.payment.payment_service import Card
@@ -13,22 +13,22 @@ def process_payment():
 
     if not data:
         msg = "There is no data in the request"
-        return jsonify({"status code": 200, "msg": msg}), 400
+        return make_response(jsonify({"status_code": 400, "msg": msg}), 400)
     json_data = json.loads(data)
 
     card_data = Card()
     try:
         status, msg = card_data.verify_input(**json_data)
         if not status:
-            return jsonify({"status code": 400, "msg": msg}), 400
+            return make_response(jsonify({"status_code": 400, "msg": msg}), 400)
 
         payment_status = ExternalPaymentService(card_data.Amount, card_data)
 
         status, msg = payment_status.make_payment()
         if status:
-            return jsonify({"status code": 200, "msg": msg}), 200
+            return make_response(jsonify({"status_code": 200, "msg": msg}), 200)
         else:
-            return jsonify({"status code": 400, "msg": msg}), 400
+            return make_response(jsonify({"status_code": 400, "msg": msg}), 400)
 
     except:
-        return jsonify({"status code": 500, "msg": "whoops! something went wrong"}), 500
+        return make_response(jsonify({"status_code": 500, "msg": "whoops! something went wrong"}), 500)

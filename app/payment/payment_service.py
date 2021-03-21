@@ -13,7 +13,7 @@ class Card:
 
     @staticmethod
     def validate_card(card):
-        if re.search(r"^[973][0-9]{15}|[973][0-9]{3}-[0-9]{4}-[0-9]{4}-[0-9]{4}$", card):
+        if re.search(r"^[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{4}$", card):
             return True
         return False
 
@@ -43,7 +43,7 @@ class Card:
         amount = kwargs.get("Amount")
 
         if not (type(credit_card_number) == str and self.validate_card(credit_card_number)):
-            msg = "Credit card number is not valid"
+            msg = "Credit card number is not valid. It should contain 16 digits"
             return False, msg
 
         if not type(card_holder) == str:
@@ -55,19 +55,18 @@ class Card:
                 msg = "Security code is not correct"
                 return False, msg
 
-        current_date = self.get_start_date_of_month()
-        input_date = datetime.strptime(expiration_date, "%Y/%m").date()
-
-        if not input_date > current_date:
-            msg = "Date is not correct"
-            return False, msg
-
         try:
+            msg = "Date is not correct it should be in this format: year/month e.g. 2021/12"
+            current_date = self.get_start_date_of_month()
+            input_date = datetime.strptime(expiration_date, "%Y/%m").date()
+
+            if not input_date > current_date:
+                return False, msg
+
+            msg = "Amount is not valid"
             if not Decimal(amount) > 0:
-                msg = "Amount is not valid"
                 return False, msg
         except:
-            msg = "Amount is not valid"
             return False, msg
 
         self.CreditCardNumber = credit_card_number
